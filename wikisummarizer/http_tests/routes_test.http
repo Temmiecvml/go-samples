@@ -1,0 +1,4 @@
+### Test Home Route
+GET http://localhost:3000/
+
+### Add more route tests here

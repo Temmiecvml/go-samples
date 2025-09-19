@@ -37,6 +37,16 @@ A simple wiki application that demonstrates file handling in Go.
   go run wiki.go
   ```
 
+#### c. Net HTTP
+A project showcasing the use of the `net/http` package for building HTTP servers and handling requests.
+
+- **File:** `learning_chi/03_net_http/main.go`
+- **How to Run:**
+  ```bash
+  cd learning_chi/03_net_http
+  go run main.go
+  ```
+
 ### 3. Unicode Strings
 Examples of working with Unicode strings in Go.
 
@@ -46,6 +56,20 @@ Examples of working with Unicode strings in Go.
   cd unicode_strings
   go run main.go
   ```
+
+### 4. Wiki Summarizer
+A more advanced project that demonstrates building a web application with multiple components, including routing, database handling, and services.
+
+- **Main File:** `wikisummarizer/cmd/main.go`
+- **How to Run:**
+  ```bash
+  cd wikisummarizer
+  go run cmd/main.go
+  ```
+- **Features:**
+  - RESTful API for managing articles and users.
+  - Database integration for storing and retrieving data.
+  - Modular structure with internal packages for better organization.
 
 ## Prerequisites
 - Go 1.16 or later
