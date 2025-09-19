@@ -1,0 +1,17 @@
+ GET http://localhost:8080/starwars
+
+###
+GET http://localhost:8080/view/StarWars
+
+###
+GET http://localhost:8080/edit/StarWars
+
+
+
+# POST http://localhost:8080/create
+# Content-Type: application/json
+
+# {
+#   "name": "example",
+#   "value": "test"
+# }
