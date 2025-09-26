@@ -1,12 +1,23 @@
 package config
 
-import "os"
+import (
+	"fmt"
+	"os"
 
-// AppConfig holds global application configurations.
-var AppConfig = struct {
-	Port string
-}{
-	Port: getEnv("APP_PORT", "3000"),
+	"go.uber.org/zap/zapcore"
+)
+
+func New() *struct {
+	Port     string
+	LogLevel *zapcore.Level
+} {
+	return &struct {
+		Port     string
+		LogLevel *zapcore.Level
+	}{
+		Port:     getEnv("PORT", "3000"),
+		LogLevel: getLogLevel(),
+	}
 }
 
 func getEnv(key, fallback string) string {
@@ -14,4 +25,16 @@ func getEnv(key, fallback string) string {
 		return value
 	}
 	return fallback
+}
+
+func getLogLevel() *zapcore.Level {
+	levelStr := getEnv("LOG_LEVEL", "info")
+	level, err := zapcore.ParseLevel(levelStr)
+	if err != nil {
+		fmt.Printf("Invalid log level '%s', defaulting to 'info': %v\n", levelStr, err)
+		defaultLevel := zapcore.InfoLevel
+		return &defaultLevel
+	}
+
+	return &level
 }

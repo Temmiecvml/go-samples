@@ -2,30 +2,40 @@ package main
 
 import (
 	"log"
-	"os"
 
 	"github.com/joho/godotenv"
+	"github.com/temmiecvml/go-samples/wikisummarizer/internal/config"
 	"github.com/temmiecvml/go-samples/wikisummarizer/internal/routes"
 	"github.com/temmiecvml/go-samples/wikisummarizer/internal/utils"
 	"github.com/temmiecvml/go-samples/wikisummarizer/pkg/server"
 )
 
 func main() {
+	if err := run(); err != nil {
+		log.Fatalf("Application failed to start: %v", err)
+	}
+}
+
+func run() error {
 	// Load environment variables
 	if err := godotenv.Load(); err != nil {
-		log.Fatal("Error loading .env file")
+		return err
 	}
+
+	// Load application config
+	cfg := config.New()
 
 	// Initialize logger
-	utils.InitLogger()
-	utils.LogInfo("Logger initialized successfully")
-
-	// Start server
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "3000" // Default port
+	if err := utils.InitLogger(cfg.LogLevel); err != nil {
+		return err
 	}
-	utils.LogInfo("Starting server on port " + port)
+	defer utils.SyncLogger()
+	utils.Debug("Logger initialized successfully")
+
+	// Start the server
+	utils.Info("Starting server on port " + cfg.Port)
 	r := routes.NewRouter()
-	server.StartServer(":"+port, r)
+	server.StartServer(":"+cfg.Port, r)
+
+	return nil
 }

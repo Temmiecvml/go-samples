@@ -17,7 +17,7 @@ func NewRouter() *chi.Mux {
 		r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 			_, err := w.Write([]byte("Hello World!")) // Handle error
 			if err != nil {
-				utils.LogError("Error writing response: " + err.Error())
+				utils.Error("Error writing response: " + err.Error())
 			}
 		})
 	})
