@@ -30,10 +30,10 @@ func run() error {
 		return err
 	}
 	defer utils.SyncLogger()
-	utils.Debug("Logger initialized successfully")
+	utils.LogDebug("Logger initialized successfully")
 
 	// Start the server
-	utils.Info("Starting server on port " + cfg.Port)
+	utils.LogInfo("Starting server on port " + cfg.Port)
 	r := routes.NewRouter()
 	server.StartServer(":"+cfg.Port, r)
 

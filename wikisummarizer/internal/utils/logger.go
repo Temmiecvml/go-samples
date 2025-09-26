@@ -57,19 +57,19 @@ func InitLogger(level *zapcore.Level) error {
 	return nil
 }
 
-func Debug(msg string, fields ...zap.Field) {
+func LogDebug(msg string, fields ...zap.Field) {
 	ZapLogger.Debug("🐛 "+msg, fields...)
 }
 
-func Info(msg string, fields ...zap.Field) {
+func LogInfo(msg string, fields ...zap.Field) {
 	ZapLogger.Info("ℹ️ "+msg, fields...)
 }
 
-func Warn(msg string, fields ...zap.Field) {
+func LogWarning(msg string, fields ...zap.Field) {
 	ZapLogger.Warn("⚠️ "+msg, fields...)
 }
 
-func Error(msg string, fields ...zap.Field) {
+func LogError(msg string, fields ...zap.Field) {
 	ZapLogger.Error("❌ "+msg, fields...)
 }
 
