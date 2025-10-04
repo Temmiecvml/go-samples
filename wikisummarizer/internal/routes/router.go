@@ -8,6 +8,8 @@ import (
 	"github.com/temmiecvml/go-samples/wikisummarizer/internal/utils"
 )
 
+var logger = utils.GetLogger("routes.router")
+
 func NewRouter() *chi.Mux {
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
@@ -17,7 +19,7 @@ func NewRouter() *chi.Mux {
 		r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 			_, err := w.Write([]byte("Hello World!")) // Handle error
 			if err != nil {
-				utils.LogError("Error writing response: " + err.Error())
+				logger.Error("Error writing response: " + err.Error())
 			}
 		})
 	})

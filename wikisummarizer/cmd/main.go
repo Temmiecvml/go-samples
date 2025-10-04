@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/joho/godotenv"
@@ -8,7 +9,10 @@ import (
 	"github.com/temmiecvml/go-samples/wikisummarizer/internal/routes"
 	"github.com/temmiecvml/go-samples/wikisummarizer/internal/utils"
 	"github.com/temmiecvml/go-samples/wikisummarizer/pkg/server"
+	"go.uber.org/zap"
 )
+
+var logger *zap.Logger
 
 func main() {
 	if err := run(); err != nil {
@@ -19,21 +23,23 @@ func main() {
 func run() error {
 	// Load environment variables
 	if err := godotenv.Load(); err != nil {
-		return err
+		return fmt.Errorf("failed to load environment variables: %w", err)
 	}
 
 	// Load application config
 	cfg := config.New()
 
 	// Initialize logger
-	if err := utils.InitLogger(cfg.LogLevel); err != nil {
-		return err
+	var err error
+	logger, err = utils.InitLoggerRotating(cfg.LogLevel)
+	if err != nil {
+		return fmt.Errorf("failed to initialize logger: %w", err)
 	}
-	defer utils.SyncLogger()
-	utils.LogDebug("Logger initialized successfully")
+	defer logger.Sync()
+	logger.Info("Logger initialized successfully")
 
 	// Start the server
-	utils.LogInfo("Starting server on port " + cfg.Port)
+	logger.Info("Starting server on port " + cfg.Port)
 	r := routes.NewRouter()
 	server.StartServer(":"+cfg.Port, r)
 

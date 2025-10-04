@@ -8,6 +8,7 @@ import (
 
 // UserHandler handles user-related routes
 func UserHandler(w http.ResponseWriter, r *http.Request) {
-	utils.LogInfo("UserHandler invoked")
+	logger := utils.GetLogger("handlers.user_handler")
+	logger.Info("UserHandler invoked")
 	w.Write([]byte("User endpoint"))
 }

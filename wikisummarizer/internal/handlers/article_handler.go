@@ -8,18 +8,20 @@ import (
 	"github.com/temmiecvml/go-samples/wikisummarizer/internal/utils"
 )
 
+var logger = utils.GetLogger("handlers.article_handler")
+
 // GetArticleHandler handles the fetching and summarizing of a Wikipedia article
 func GetArticleHandler(w http.ResponseWriter, r *http.Request) {
 	articleName := chi.URLParam(r, "name")
 	if articleName == "" {
-		utils.LogError("Article name is missing")
+		logger.Error("Article name is missing")
 		http.Error(w, "Article name is required", http.StatusBadRequest)
 		return
 	}
 
 	summary, err := services.FetchAndSummarizeArticle(articleName)
 	if err != nil {
-		utils.LogError("Error fetching or summarizing article: " + err.Error())
+		logger.Error("Error fetching or summarizing article: " + err.Error())
 		http.Error(w, "Failed to process article", http.StatusInternalServerError)
 		return
 	}

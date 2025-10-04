@@ -7,6 +7,7 @@ import (
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+	"gopkg.in/natefinch/lumberjack.v2"
 )
 
 const logFilePath = "./logs/app.log"
@@ -38,44 +39,77 @@ var (
 )
 
 // InitLogger creates a JSON zap logger that writes to stdout and to logFilePath.
-func InitLogger(level *zapcore.Level) error {
+func InitLogger(level *zapcore.Level) (*zap.Logger, error) {
 	if level != nil {
 		loggerConfig.Level.SetLevel(*level)
 	}
 
+	// Ensure the log directory exists
 	if err := os.MkdirAll(filepath.Dir(logFilePath), 0o755); err != nil {
-		return fmt.Errorf("create log directory: %w", err)
+		return nil, fmt.Errorf("failed to create log directory: %w", err)
 	}
 
+	// Build the logger
 	logger, err := loggerConfig.Build()
 	if err != nil {
-		return fmt.Errorf("build zap logger: %w", err)
+		return nil, fmt.Errorf("failed to build zap logger: %w", err)
 	}
 
 	ZapLogger = logger
 
-	return nil
+	return ZapLogger, nil
 }
 
-func LogDebug(msg string, fields ...zap.Field) {
-	ZapLogger.Debug("🐛 "+msg, fields...)
-}
+func InitLoggerRotating(level zapcore.Level) (*zap.Logger, error) {
 
-func LogInfo(msg string, fields ...zap.Field) {
-	ZapLogger.Info("ℹ️ "+msg, fields...)
-}
-
-func LogWarning(msg string, fields ...zap.Field) {
-	ZapLogger.Warn("⚠️ "+msg, fields...)
-}
-
-func LogError(msg string, fields ...zap.Field) {
-	ZapLogger.Error("❌ "+msg, fields...)
-}
-
-func SyncLogger() {
-	if ZapLogger == nil {
-		return
+	if err := os.MkdirAll(filepath.Dir(logFilePath), 0o755); err != nil {
+		return nil, fmt.Errorf("failed to create log directory: %w", err)
 	}
-	_ = ZapLogger.Sync() // ignore error per zap docs (some platforms return non-nil)
+
+	// Encoder (JSON)
+	encCfg := zapcore.EncoderConfig{
+		MessageKey:     "message",
+		LevelKey:       "level",
+		TimeKey:        "ts",
+		CallerKey:      "caller",
+		EncodeLevel:    zapcore.LowercaseLevelEncoder,
+		EncodeTime:     zapcore.ISO8601TimeEncoder,
+		EncodeCaller:   zapcore.ShortCallerEncoder,
+		EncodeDuration: zapcore.StringDurationEncoder,
+	}
+	encoder := zapcore.NewJSONEncoder(encCfg)
+
+	// lumberjack writer for rotation
+	lumberjackWriter := &lumberjack.Logger{
+		Filename:   logFilePath,
+		MaxSize:    100, // MB
+		MaxBackups: 7,
+		MaxAge:     28, // days
+		Compress:   true,
+	}
+
+	fileWS := zapcore.AddSync(lumberjackWriter) // WriteSyncer for file
+	consoleWS := zapcore.Lock(os.Stdout)
+
+	// Per-sink level enablers (optional)
+	fileLevel := zap.LevelEnablerFunc(func(lvl zapcore.Level) bool { return lvl >= zapcore.InfoLevel })
+	consoleLevel := zap.LevelEnablerFunc(func(lvl zapcore.Level) bool { return lvl >= level })
+
+	// Create cores and combine
+	cores := []zapcore.Core{
+		zapcore.NewCore(encoder, consoleWS, consoleLevel),
+		zapcore.NewCore(encoder, fileWS, fileLevel),
+	}
+	core := zapcore.NewTee(cores...)
+
+	logger := zap.New(core, zap.AddCaller(), zap.AddStacktrace(zap.ErrorLevel))
+	ZapLogger = logger
+	return ZapLogger, nil
+}
+
+func GetLogger(name string) *zap.Logger {
+	if ZapLogger == nil {
+		return zap.NewNop().Named(name)
+	}
+	return ZapLogger.Named(name)
 }

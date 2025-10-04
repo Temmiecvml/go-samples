@@ -9,11 +9,11 @@ import (
 
 func New() *struct {
 	Port     string
-	LogLevel *zapcore.Level
+	LogLevel zapcore.Level
 } {
 	return &struct {
 		Port     string
-		LogLevel *zapcore.Level
+		LogLevel zapcore.Level
 	}{
 		Port:     getEnv("PORT", "3000"),
 		LogLevel: getLogLevel(),
@@ -27,14 +27,13 @@ func getEnv(key, fallback string) string {
 	return fallback
 }
 
-func getLogLevel() *zapcore.Level {
+func getLogLevel() zapcore.Level {
 	levelStr := getEnv("LOG_LEVEL", "info")
 	level, err := zapcore.ParseLevel(levelStr)
 	if err != nil {
 		fmt.Printf("Invalid log level '%s', defaulting to 'info': %v\n", levelStr, err)
-		defaultLevel := zapcore.InfoLevel
-		return &defaultLevel
+		return zapcore.InfoLevel
 	}
 
-	return &level
+	return level
 }
