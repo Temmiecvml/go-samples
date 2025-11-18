@@ -1,0 +1,12 @@
+server:
+  port: "8080"
+  host: "localhost"
+  read_timeout: 10s
+  write_timeout: 10s
+
+logging:
+  level: "debug"
+  development: true
+  encoding: "console"
+  output_paths:
+    - "stdout"

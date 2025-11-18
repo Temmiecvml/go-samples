@@ -1,0 +1,12 @@
+{
+  "name": "Test Article",
+  "query": "test query",
+  "summary": "This is a test summary",
+  "sources": [
+    {
+      "title": "Test Source 1",
+      "url": "https://example.com/1",
+      "position": 0
+    }
+  ]
+}

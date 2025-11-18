@@ -1,0 +1,74 @@
+{{define "title"}}WikiSummarizer - Search{{end}}
+
+{{define "styles"}}
+.search-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+}
+
+.logo {
+    font-size: 48px;
+    font-weight: bold;
+    color: #4285f4;
+    margin-bottom: 30px;
+}
+
+.search-box {
+    width: 100%;
+    max-width: 600px;
+}
+
+.search-input {
+    width: 100%;
+    padding: 15px 20px;
+    font-size: 16px;
+    border: 1px solid #dfe1e5;
+    border-radius: 24px;
+    outline: none;
+    box-shadow: 0 1px 6px rgba(32,33,36,.28);
+}
+
+.search-input:hover {
+    box-shadow: 0 1px 6px rgba(32,33,36,.4);
+}
+
+.search-buttons {
+    display: flex;
+    justify-content: center;
+    margin-top: 30px;
+    gap: 10px;
+}
+
+.btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    background-color: #f8f9fa;
+    color: #3c4043;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.btn:hover {
+    box-shadow: 0 1px 1px rgba(0,0,0,.1);
+    background-color: #f8f9fa;
+    border: 1px solid #dadce0;
+}
+{{end}}
+
+{{define "content"}}
+<div class="search-container">
+    <div class="logo">WikiSummarizer</div>
+    <form action="/summary" method="GET" class="search-box">
+        <input type="text" name="q" class="search-input" placeholder="Search Wikipedia..." autofocus required>
+        <div class="search-buttons">
+            <button type="submit" class="btn">Search & Summarize</button>
+        </div>
+    </form>
+</div>
+{{end}}
+
+{{template "base.html" .}}

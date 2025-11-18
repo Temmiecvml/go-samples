@@ -1,0 +1,109 @@
+{{define "title"}}{{.Query}} - WikiSummarizer{{end}}
+
+{{define "styles"}}
+.header {
+    background-color: #f8f9fa;
+    padding: 15px 0;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.header-content {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.logo-small {
+    font-size: 24px;
+    font-weight: bold;
+    color: #4285f4;
+}
+
+.search-small {
+    flex: 1;
+    max-width: 600px;
+}
+
+.search-small input {
+    width: 100%;
+    padding: 10px 15px;
+    border: 1px solid #dfe1e5;
+    border-radius: 24px;
+    font-size: 14px;
+}
+
+.summary-content {
+    margin-top: 30px;
+}
+
+.summary-title {
+    font-size: 28px;
+    margin-bottom: 10px;
+    color: #202124;
+}
+
+.summary-text {
+    font-size: 16px;
+    line-height: 1.8;
+    color: #3c4043;
+    margin-bottom: 30px;
+    white-space: pre-wrap;
+}
+
+.sources-section {
+    border-top: 1px solid #e0e0e0;
+    padding-top: 30px;
+    margin-top: 30px;
+}
+
+.sources-title {
+    font-size: 20px;
+    margin-bottom: 15px;
+    color: #202124;
+}
+
+.source-item {
+    margin-bottom: 10px;
+}
+
+.source-link {
+    color: #1a0dab;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.source-link:hover {
+    text-decoration: underline;
+}
+{{end}}
+
+{{define "content"}}
+<div class="header">
+    <div class="container">
+        <div class="header-content">
+            <div class="logo-small">WikiSummarizer</div>
+            <form action="/summary" method="GET" class="search-small">
+                <input type="text" name="q" value="{{.Query}}" placeholder="Search Wikipedia...">
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="summary-content">
+        <h1 class="summary-title">Summary: {{.Article.Name}}</h1>
+        <div class="summary-text">{{.Article.Summary}}</div>
+        
+        <div class="sources-section">
+            <h2 class="sources-title">Sources</h2>
+            {{range .Article.Sources}}
+            <div class="source-item">
+                <a href="{{.URL}}" target="_blank" class="source-link">{{.Title}}</a>
+            </div>
+            {{end}}
+        </div>
+    </div>
+</div>
+{{end}}
+
+{{template "base.html" .}}

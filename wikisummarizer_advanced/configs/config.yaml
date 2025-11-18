@@ -1,0 +1,40 @@
+server:
+  port: "3000"
+  host: "localhost"
+  read_timeout: 15s
+  write_timeout: 15s
+  shutdown_timeout: 10s
+
+logging:
+  level: "info"
+  development: false
+  encoding: "json"
+  output_paths:
+    - "stdout"
+    - "./logs/app.log"
+
+database:
+  driver: "sqlite3"
+  path: "./data/wikisummarizer.db"
+  max_open_conns: 25
+  max_idle_conns: 5
+  conn_max_lifetime: 5m
+
+summarizer:
+  provider: "ollama"  # ollama or gemini
+  ollama_url: "http://localhost:11434"
+  ollama_model: "llama2"
+  gemini_api_key: ""
+  gemini_model: "gemini-pro"
+  timeout: 60s
+  max_retries: 3
+
+jwt:
+  secret: "change-this-secret-key-in-production"
+  expiration_hours: 24
+
+wikipedia:
+  api_url: "https://en.wikipedia.org/w/api.php"
+  max_articles: 5
+  timeout: 30s
+  concurrent_fetches: 3

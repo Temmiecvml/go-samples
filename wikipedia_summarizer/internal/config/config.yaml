@@ -1,0 +1,29 @@
+server:
+  port: "3000"
+  host: "localhost"
+
+logging:
+  level: "info"
+  development: false
+  encoding: "json"
+  output_paths:
+    - "stdout"
+    - "./logs/app.log"
+
+database:
+  driver: "sqlite3"
+  uri: "./data/wikisummarizer.db"
+  max_open_conns: 25
+  max_idle_conns: 5
+  conn_max_lifetime: 5m
+
+summarizer:
+  provider: "ollama"  # ollama or gemini
+  url: "http://localhost:11434"
+  model: "llama2"
+  api_key: ""
+  max_retries: 3
+
+jwt:
+  secret: "change-this-secret-key-in-production"
+  expiration_hours: 24

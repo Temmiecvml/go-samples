@@ -1,0 +1,294 @@
+{{define "title"}}Admin Panel - WikiSummarizer{{end}}
+
+{{define "styles"}}
+.admin-header {
+    background-color: #4285f4;
+    color: white;
+    padding: 15px 0;
+}
+
+.admin-header h1 {
+    font-size: 24px;
+}
+
+.logout-btn {
+    float: right;
+    background-color: white;
+    color: #4285f4;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.tabs {
+    display: flex;
+    gap: 10px;
+    margin: 20px 0;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+.tab {
+    padding: 10px 20px;
+    cursor: pointer;
+    background: none;
+    border: none;
+    font-size: 16px;
+}
+
+.tab.active {
+    border-bottom: 3px solid #4285f4;
+    color: #4285f4;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+table th, table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+table th {
+    background-color: #f5f5f5;
+}
+
+.btn-delete {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn-add {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-bottom: 20px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.form-group input, .form-group select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+{{end}}
+
+{{define "content"}}
+<div class="admin-header">
+    <div class="container">
+        <h1>Admin Panel
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </h1>
+    </div>
+</div>
+
+<div class="container">
+    <div class="tabs">
+        <button class="tab active" onclick="showTab('articles')">Articles</button>
+        <button class="tab" onclick="showTab('users')">Users</button>
+        <button class="tab" onclick="showTab('settings')">Settings</button>
+    </div>
+
+    <div id="articles" class="tab-content active">
+        <h2>Articles</h2>
+        <table id="articlesTable">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Query</th>
+                    <th>Created At</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <div id="users" class="tab-content">
+        <h2>Users</h2>
+        <button class="btn-add" onclick="showAddUserForm()">Add User</button>
+        <table id="usersTable">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <div id="settings" class="tab-content">
+        <h2>Summarizer Settings</h2>
+        <form id="settingsForm">
+            <div class="form-group">
+                <label>Provider</label>
+                <select id="provider" name="summarizer_type">
+                    <option value="ollama">Ollama</option>
+                    <option value="gemini">Google Gemini</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Ollama URL</label>
+                <input type="text" id="ollamaUrl" name="ollama_url">
+            </div>
+            <div class="form-group">
+                <label>Ollama Model</label>
+                <input type="text" id="ollamaModel" name="ollama_model">
+            </div>
+            <div class="form-group">
+                <label>Gemini API Key</label>
+                <input type="text" id="geminiKey" name="gemini_api_key">
+            </div>
+            <button type="submit" class="btn-add">Save Settings</button>
+        </form>
+    </div>
+</div>
+
+<script>
+const token = localStorage.getItem('token');
+if (!token) {
+    window.location.href = '/admin/login';
+}
+
+async function apiCall(url, options = {}) {
+    options.headers = { ...options.headers, 'Authorization': 'Bearer ' + token };
+    return fetch(url, options);
+}
+
+function showTab(tabName) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    event.target.classList.add('active');
+    document.getElementById(tabName).classList.add('active');
+    
+    if (tabName === 'articles') loadArticles();
+    if (tabName === 'users') loadUsers();
+    if (tabName === 'settings') loadSettings();
+}
+
+async function loadArticles() {
+    const response = await apiCall('/api/admin/articles');
+    const articles = await response.json();
+    const tbody = document.querySelector('#articlesTable tbody');
+    tbody.innerHTML = articles.map(a => `
+        <tr>
+            <td>${a.id}</td>
+            <td>${a.name}</td>
+            <td>${a.query}</td>
+            <td>${new Date(a.created_at).toLocaleString()}</td>
+            <td><button class="btn-delete" onclick="deleteArticle(${a.id})">Delete</button></td>
+        </tr>
+    `).join('');
+}
+
+async function deleteArticle(id) {
+    if (!confirm('Delete this article?')) return;
+    await apiCall('/api/admin/articles/' + id, { method: 'DELETE' });
+    loadArticles();
+}
+
+async function loadUsers() {
+    const response = await apiCall('/api/admin/users');
+    const users = await response.json();
+    const tbody = document.querySelector('#usersTable tbody');
+    tbody.innerHTML = users.map(u => `
+        <tr>
+            <td>${u.id}</td>
+            <td>${u.username}</td>
+            <td>${u.email}</td>
+            <td>${u.role}</td>
+            <td><button class="btn-delete" onclick="deleteUser(${u.id})">Delete</button></td>
+        </tr>
+    `).join('');
+}
+
+async function deleteUser(id) {
+    if (!confirm('Delete this user?')) return;
+    await apiCall('/api/admin/users/' + id, { method: 'DELETE' });
+    loadUsers();
+}
+
+function showAddUserForm() {
+    const username = prompt('Username:');
+    const email = prompt('Email:');
+    const password = prompt('Password:');
+    const role = prompt('Role (admin/user):', 'user');
+    
+    if (username && email && password) {
+        createUser({ username, email, password, role });
+    }
+}
+
+async function createUser(userData) {
+    await apiCall('/api/admin/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(userData)
+    });
+    loadUsers();
+}
+
+async function loadSettings() {
+    const response = await apiCall('/api/admin/settings');
+    const settings = await response.json();
+    document.getElementById('provider').value = settings.summarizer_type;
+    document.getElementById('ollamaUrl').value = settings.ollama_url;
+    document.getElementById('ollamaModel').value = settings.ollama_model;
+    document.getElementById('geminiKey').value = settings.gemini_api_key;
+}
+
+document.getElementById('settingsForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const data = Object.fromEntries(formData);
+    await apiCall('/api/admin/settings', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    });
+    alert('Settings saved!');
+});
+
+function logout() {
+    localStorage.removeItem('token');
+    window.location.href = '/admin/login';
+}
+
+loadArticles();
+</script>
+{{end}}
+
+{{template "base.html" .}}
